@@ -6,7 +6,7 @@ use Mailstream\Quickmail\Http\Controllers\LabelController;
 use Mailstream\Quickmail\Http\Controllers\MailController;
 
 Route::middleware(['web', 'auth'])->group(function () {
-    Route::get('/inbox', [MailController::class, 'inboxMail'])->name('mail.inbox');
+    // Route::get('/inbox', [MailController::class, 'inboxMail'])->name('mail.inbox');
     Route::post('/store' , [MailController::class , 'emailStore'])->name('mail.store');
     Route::get('/mail/all', [MailController::class, 'allMails'])->name('mail.all');
     Route::get('/mail/inbox', [MailController::class, 'inboxMail'])->name('mail.inbox');

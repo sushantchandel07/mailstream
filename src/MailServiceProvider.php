@@ -31,7 +31,7 @@ class MailServiceProvider extends ServiceProvider
         ], 'quickmail-models');
         $this->publishes([
             __DIR__. '/Http/Requests' =>app_path('Http/Requests'),
-        ], 'quickmails-Requests');
+        ], 'quickmails-requests');
     }
     
 

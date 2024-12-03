@@ -1,0 +1,26 @@
+{
+    "name": "mailstream/quickmail",
+    "description": "A custom package for handling mail services",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Vendor\\Quickmail\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "detailswes",
+            "email": "details.wes@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mailstream\\Quickmail\\MailServiceProvider"
+            ]
+        }
+    }
+}

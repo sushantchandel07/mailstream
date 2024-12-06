@@ -58,29 +58,21 @@ class MailController extends Controller
                 ->withInput();
         }
     }
-    public function handleEmailAction(Request $request)
-    {
-        try {
-            $request->validate([
-                'email_ids' => 'required|array',
-                'email_ids.*' => 'integer',
-                'action' => 'required|string',
-            ]);
-            $emailIds = $request->input('email_ids');
-            $action = $request->input('action');
 
-            $success = $this->mailService->updateEmailStatus($emailIds, $action);
-            if ($success) {
-                return response()->json(['message' => 'Emails updated successfully.'], 200);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error updating email status', [
-                'error_message' => $e->getMessage(),
-            ]);
-            return response()->json(['message' => 'An unexpected error occurred. Please try again later.'], 500);
-        }
-    }
+    // public function DraftEmaiSent(){
+    //     try {
+    //         $validated['is_sent'] = true;
+    //         $validated['is_draft'] = false;
+    //         $email = $this->mailService->updateOrCreateEmail($validated, );
 
+    //         $this->mailService->storeEmailRecipients($email->id, $request->only(['email', 'cc', 'bcc']), Auth::id());
+    //         return redirect()->back()->with('success', 'Email sent successfully');
+    //     } catch (\Exception $e) {
+    //         return redirect()->back()
+    //             ->with('error', 'Failed to send email: ' . $e->getMessage())
+    //             ->withInput();
+    //     }
+    // }
     public function allMails()
     {
         try {
@@ -156,9 +148,42 @@ class MailController extends Controller
         }
     }
  
-   
+    public function markAsRead($emailRecipientId)
+    {
+        try {
+            $emailRecipient = EmailRecipient::findOrFail($emailRecipientId);
+            $emailRecipient->is_read = true;
+            $emailRecipient->save();
 
-    
+            return response()->json([
+                'success' => true,
+                'message' => 'Email marked as read'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error marking email as read: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark email as read'
+            ], 500);
+        }
+    }
+
+    public function markAllUnread()
+    {
+        try {
+            EmailRecipient::where('is_read', true)->update(['is_read' => false]);
+            return response()->json([
+                'success' => true,
+                'message' => 'All emails marked as unread',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error marking all emails as unread: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark all emails as unread',
+            ], 500);
+        }
+    }
 
 
     public function toggleStar(Request $request, $id)
@@ -231,6 +256,35 @@ class MailController extends Controller
                 ->withInput();
         }
     }
+
+
+
+
+    public function markAsImportant(Request $request)
+    {
+        try {
+            $request->validate([
+                'mail_id' => 'required|array',
+                'mail_id.*' => 'integer|exists:email_recipients,mail_id',
+            ]);
+            EmailRecipient::whereIn('id', $request->mail_id)
+                ->update(['is_important' => true]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Emails marked as important successfully.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error marking emails as important:' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark emails as important.'
+            ], 500);
+        }
+    }
+
+
+
 
 
     public function importantMails()

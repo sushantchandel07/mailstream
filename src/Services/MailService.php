@@ -22,6 +22,41 @@ class MailService
         ]);
     }
 
+
+    public function updateEmailStatus(array $emailIds, string $action): bool
+    {
+        $column = null;
+        $status = null;
+
+        switch ($action) {
+            case 'mark_as_read':
+                $column = 'is_read';
+                $status = true;
+                break;
+            case 'mark_as_unread':
+                $column = 'is_read';
+                $status = false;
+                break;
+            case 'mark_as_important':
+                $column = 'is_important';
+                $status = true;
+                break;
+            default:
+                throw new \InvalidArgumentException('Invalid action provided.');
+        }
+
+        Log::info('Updating email status', [
+            'column' => $column,
+            'status' => $status,
+            'email_ids' => $emailIds,
+        ]);
+
+        return DB::table('email_recipients')
+            ->whereIn('mail_id', $emailIds)
+            ->update([$column => $status]);
+            
+    }
+
     public function updateOrCreateEmail(array $data, $emailId = null)
     {
         return Email::updateOrCreate(

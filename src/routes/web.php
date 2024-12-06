@@ -21,6 +21,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/emails/mark-important', [mailController::class, 'markAsImportant']);
     Route::get('/emails/important', [MailController::class, 'importantMails'])->name('mail.important');
     Route::post('/emails/mark-all-unread', [MailController::class, 'markAllUnread']);
+    Route::post('/emails/action', [MailController::class, 'handleEmailAction'])->name('emails.action');
 });
 
 Route::middleware(['web', 'auth'])->group(function () {

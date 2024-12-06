@@ -57,7 +57,7 @@
                                             <i class="ri-more-2-fill align-bottom"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="#" id="mark-all-read">Mark all as Read</a>
+                                            <a class="dropdown-item" href="#" id="mark-all-read">Mark as Read</a>
                                         </div>
                                     </div>
                                     <div class="alert alert-warning alert-dismissible unreadConversations-alert px-4 fade show " id="unreadConversations" role="alert">
@@ -75,7 +75,7 @@
                                             <i class="ri-more-2-fill align-bottom"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="#" id="mark-all-unread">Mark all as Unread</a>
+                                            <a class="dropdown-item" href="#" id="mark-all-unread">Mark as Unread</a>
                                             <a class="dropdown-item" href="#" id="mark-as-important">Mark as Important</a>
                                             <a class="dropdown-item" href="#">Add to Tasks</a>
                                             <a class="dropdown-item" href="#">Trash</a>
@@ -123,7 +123,7 @@
                         <li class="{{ $email->is_read ? 'read-email' : 'unread-email' }}">
 
                             <div class="col-mail col-mail-1">
-                                <div class="form-check checkbox-wrapper-mail fs-14">                                
+                                <div class="form-check checkbox-wrapper-mail fs-14">
                                     <input class="form-check-input email-checkbox" type="checkbox"
                                         data-email-id="{{ $email->id }}">
                                     <label class="form-check-label" for="checkbox"></label>
@@ -261,8 +261,50 @@
 
 
                     <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const markAllUnreadBtn = document.getElementById('mark-all-unread');
+                            const markAsImportantBtn = document.getElementById('mark-as-important');
+                            const markAllReadBtn = document.getElementById('mark-all-read');
+
+                            function handleEmailAction(action) {
+                                const selectedEmails = Array.from(document.querySelectorAll('.email-checkbox:checked')).map(checkbox => checkbox.dataset.emailId);
+
+                                if (selectedEmails.length === 0) {
+                                    alert('Please select at least one email.');
+                                    return;
+                                }
+
+                                fetch('/emails/action', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                        },
+                                        body: JSON.stringify({
+                                            email_ids: selectedEmails,
+                                            action: action,
+                                        }),
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => alert(data.message))
+                                    .catch(error => console.error('Error:', error));
+                            }
+
+                            if (markAllUnreadBtn) {
+                                markAllUnreadBtn.addEventListener('click', () => handleEmailAction('mark_as_unread'));
+                            }
+
+                            if (markAsImportantBtn) {
+                                markAsImportantBtn.addEventListener('click', () => handleEmailAction('mark_as_important'));
+                            }
+
+                            if (markAllReadBtn) {
+                                markAllReadBtn.addEventListener('click', () => handleEmailAction('mark_as_read'));
+                            }
+                        });
+
                         document.getElementById('trashButton').addEventListener('click', function(event) {
-                            event.preventDefault(); 
+                            event.preventDefault();
                             document.getElementById('formMethod').value = 'POST';
                             document.getElementById('ShowEmail').action = '/trash-email';
                             document.getElementById('ShowEmail').submit();
@@ -317,48 +359,6 @@
                                     this.selectedIndex = 0;
                                 });
                         });
-
-                        document.getElementById('mark-all-unread').addEventListener('click', function(e) {
-                            e.preventDefault();
-
-                            fetch('/emails/mark-all-unread', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                    },
-                                    body: JSON.stringify({
-                                        tab: 'inbox',
-                                    })
-                                })
-
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        alert('All emails marked as unread.');
-
-                                        const emailItems = document.querySelectorAll('.message-list li');
-                                        emailItems.forEach(item => {
-                                            item.classList.remove('read-email');
-                                            item.classList.add('unread-email');
-
-                                            const subject = item.querySelector('.subject');
-                                            if (subject && !subject.querySelector('b')) {
-                                                subject.innerHTML = `<b>${subject.textContent.trim()}</b>`;
-                                            }
-                                        });
-                                    } else {
-                                        alert('Failed to mark all emails as unread.');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    alert('An error occurred while marking emails as unread.');
-                                });
-                        });
-
-
-
 
                         document.addEventListener('DOMContentLoaded', function() {
                             const emailSubjects = document.querySelectorAll('.email-subject');
@@ -434,7 +434,7 @@
                                     })
                                     .catch(error => console.error('Error saving draft:', error));
                             }
-                        }); 
+                        });
 
 
                         document.querySelectorAll('.favourite-btn').forEach(button => {
@@ -465,43 +465,6 @@
                                         alert('An error occurred while updating star status');
                                     });
                             });
-                        });
-
-                        document.getElementById('mark-as-important').addEventListener('click', function(e) {
-                            e.preventDefault();
-
-                            // Collect all checked email IDs
-                            const checkedEmails = Array.from(document.querySelectorAll('.email-checkbox:checked'))
-                                .map(checkbox => checkbox.dataset.emailId);
-
-                            if (checkedEmails.length === 0) {
-                                alert('Please select at least one email.');
-                                return;
-                            }
-
-                            // Send the request to the server
-                            fetch('/emails/mark-important', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                    },
-                                    body: JSON.stringify({
-                                        mail_id: checkedEmails
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        alert('Emails marked as important successfully.');
-                                    } else {
-                                        alert('Failed to mark emails as important.');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    alert('An error occurred while marking emails as important.');
-                                });
                         });
                     </script>
 

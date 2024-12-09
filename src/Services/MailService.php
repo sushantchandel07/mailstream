@@ -4,6 +4,8 @@ namespace Mailstream\Quickmail\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Mailstream\Quickmail\Models\Email;
 use Mailstream\Quickmail\Models\EmailRecipient;
 use Mailstream\Quickmail\Models\Label;
@@ -29,7 +31,52 @@ class MailService
             $data
         );
     }
-    //
+
+
+    public function updateEmailStatus(array $emailIds, string $action): bool
+    {
+        $column = null;
+        $status = null;
+
+        switch ($action) {
+            case 'mark_as_read':
+                $column = 'is_read';
+                $status = true;
+                break;
+            case 'mark_as_unread':
+                $column = 'is_read';
+                $status = false;
+                break;
+            case 'mark_as_important':
+                $column = 'is_important';
+                $status = true;
+                break;
+            case 'mark_as_spam':
+                $column = 'is_spam';
+                $status = true;
+                break;
+            case 'mark_as_archive':
+                $column = 'is_archived';
+                $status = true;
+                break;
+            default:
+                throw new \InvalidArgumentException('Invalid action provided.');
+        }
+
+        DB::table('email_recipients')
+            ->whereIn('mail_id', $emailIds)
+            ->update([$column => $status]);
+
+        if ($action === 'mark_as_important') {
+            DB::table('emails')
+                ->whereIn('id', $emailIds)
+                ->where('is_draft', true)
+                ->update(['draft_is_important' => true]);
+        }
+        return true;
+    }
+
+
     public function storeEmailRecipients($emailId, $recipientsData, $senderId)
     {
         $recipientTypes = ['email' => 'TO', 'cc' => 'CC', 'bcc' => 'BCC'];
@@ -54,110 +101,90 @@ class MailService
         }
     }
 
-
-
     public function getUserLabels($userId)
     {
         return Label::where('user_id', $userId)->get();
     }
 
-    public function getAllEmails($userId)
+
+    public function getEmailsByTab($userId, $tab)
     {
-        return Email::Select('emails.*', 'email_recipients.is_starred')
-            ->leftjoin('email_recipients', 'emails.id', '=', 'email_recipients.mail_id')
-            ->where('emails.user_id', $userId)
-            ->orderBy('emails.created_at', 'desc')
-            ->get();
-    }
-
-
-
-    public function getInboxEmails($userId)
-    {
-        return Email::select(
-            'emails.*',
-            'users.name as recipient_name',
-            'email_recipients.is_read',
-            'email_recipients.id as recipient_id',
-            'email_recipients.is_starred'
-        )
-            ->join('email_recipients', 'emails.id', '=', 'email_recipients.mail_id')
-            ->join('users', 'email_recipients.sender_id', '=', 'users.id')
-            ->where('email_recipients.recipients_id', $userId)
-            ->where('email_recipients.is_trashed', false) 
-            ->orderBy('emails.created_at', 'desc')
-            ->get();
-    }
-
-
-    public function getSentEmails($userId)
-    {
-        return Email::select(
+        $baseQuery = Email::select(
             'emails.*',
             'sender.name as sender_name',
             'recipient.name as recipient_name',
+            'email_recipients.is_starred',
+            'email_recipients.is_important',
+            'email_recipients.is_trashed',
             'email_recipients.is_read',
-            'email_recipients.recipients_id as recipient_id',
-            'email_recipients.is_starred'
+            'email_recipients.id as recipient_id'
         )
             ->leftJoin('email_recipients', 'emails.id', '=', 'email_recipients.mail_id')
             ->leftJoin('users as sender', 'email_recipients.sender_id', '=', 'sender.id')
-            ->leftJoin('users as recipient', 'email_recipients.recipients_id', '=', 'recipient.id')
-            ->where('email_recipients.sender_id', $userId)
-            ->where('email_recipients.is_trashed', false)
-            ->orderBy('emails.created_at', 'desc')
-            ->get();
-    }
+            ->leftJoin('users as recipient', 'email_recipients.recipients_id', '=', 'recipient.id');
 
- 
-    public function getDraftEmails($userId)
-    {
-        return Email::select(
-            'emails.*',
-            'users.name as sender_name'
-        )
-            ->leftJoin('users', 'emails.user_id', '=', 'users.id')
-            ->where('emails.user_id', $userId)
-            ->where('emails.is_draft', true)
-            ->orderBy('emails.created_at', 'desc')
-            ->get();
-    }
+        switch ($tab) {
+            case 'inbox':
+                $baseQuery->where('email_recipients.recipients_id', $userId)
+                    ->where('email_recipients.is_trashed', false);
+                break;
 
-    public function getStarredEmails($userId)
-    {
-        return Email::select(
-            'emails.*',
-            'email_recipients.is_starred',
-            'email_recipients.id as recipient_id'
-        )
-            ->leftJoin('email_recipients', 'email_recipients.mail_id', '=', 'emails.id' )
-            ->where(function ($query) use ($userId) {
-                $query->where('email_recipients.recipients_id', $userId)
-                ->where('email_recipients.is_trashed', false)
-                    ->where('email_recipients.is_starred', true);
-            })
-            ->orWhere(function ($query) use ($userId) {
-                $query->where('emails.draft_is_starred', true)
-                    ->where('emails.user_id', $userId)
+            case 'sent':
+                $baseQuery->where('emails.is_sent', true)
+                    ->where('email_recipients.sender_id', $userId)
+                    ->where('email_recipients.is_trashed', false);
+                break;
+
+            case 'draft':
+                $baseQuery->where('emails.user_id', $userId)
                     ->where('emails.is_draft', true);
-            })
-            ->orderBy('emails.created_at', 'desc')
-            ->get();
-    }
+                break;
 
+            case 'starred':
+                $baseQuery->where(function ($query) use ($userId) {
+                    $query->where('email_recipients.recipients_id', $userId)
+                        ->where('email_recipients.is_trashed', false)
+                        ->where('email_recipients.is_starred', true);
+                })->orWhere(function ($query) use ($userId) {
+                    $query->where('emails.user_id', $userId)
+                        ->where('emails.is_draft', true)
+                        ->where('emails.draft_is_starred', true);
+                });
+                break;
 
-    public function getImportantEmails($userId)
-    {
-        return EmailRecipient::select(
-                'emails.*',
-                'email_recipients.is_important',
-                'email_recipients.id as recipient_id'
-            )
-            ->join('emails', 'email_recipients.mail_id', '=', 'emails.id')
-            ->where('email_recipients.recipients_id', $userId)
-            ->where('email_recipients.is_important', true)
-            ->orderBy('emails.created_at', 'desc')
-            ->get();
+            case 'important':
+                $baseQuery->where('email_recipients.recipients_id', $userId)
+                    ->where('email_recipients.is_important', true)
+                    ->where('email_recipients.is_trashed', false);
+                break;
+
+            case 'trash':
+                $baseQuery->where('email_recipients.recipients_id', $userId)
+                    ->where('email_recipients.is_trashed', true);
+                break;
+            case 'spam':
+                $baseQuery->where('email_recipients.recipients_id', $userId)
+                    ->where('email_recipients.is_spam', true)
+                    ->where('email_recipients.is_trashed', false);
+                break;
+            case 'archive':
+                $baseQuery->where('email_recipients.recipients_id', $userId)
+                    ->where('email_recipients.is_archived', true)
+                    ->where('email_recipients.is_trashed', false);
+                break;
+            case 'all':
+            default:
+                $baseQuery->where(function ($query) use ($userId) {
+                    $query->where('emails.user_id', $userId)
+                        ->orWhere('email_recipients.recipients_id', $userId);
+                })->where(function ($query) {
+                    $query->where('email_recipients.is_trashed', false)
+                        ->orWhereNull('email_recipients.is_trashed');
+                });
+                break;
+        }
+
+        return $baseQuery->orderBy('emails.created_at', 'desc')->get();
     }
 
     public function getLabelEmails($userId)
@@ -166,20 +193,6 @@ class MailService
             ->leftjoin('emails', ' emails.id', "=", "email_labels.mail_id")
             ->where('email_labels.user_id', $userId)
             ->orderBy('emails.created_at', ' desc')
-            ->get();
-    }
-
-    public function getTrashEmails($userId)
-    {
-        return Email::select(
-            'emails.*',
-            'email_recipients.is_trashed',
-            'email_recipients.id as recipient_id'
-        )
-            ->leftJoin('email_recipients', 'emails.id', '=', 'email_recipients.mail_id')
-            ->where('email_recipients.recipients_id', $userId)
-            ->where('email_recipients.is_trashed', true)
-            ->orderBy('emails.created_at', 'desc')
             ->get();
     }
 }

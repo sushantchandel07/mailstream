@@ -1,5 +1,6 @@
 @extends('quickmail::layouts.app')
 @section('content')
+
 <div class="main-content">
 
     <div class="container-fluid">
@@ -57,7 +58,7 @@
                                             <i class="ri-more-2-fill align-bottom"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="#" id="mark-all-read">Mark all as Read</a>
+                                            <a class="dropdown-item" href="#" id="mark-all-read">Mark as Read</a>
                                         </div>
                                     </div>
                                     <div class="alert alert-warning alert-dismissible unreadConversations-alert px-4 fade show " id="unreadConversations" role="alert">
@@ -75,11 +76,17 @@
                                             <i class="ri-more-2-fill align-bottom"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end">
-                                            <a class="dropdown-item" href="#" id="mark-all-unread">Mark all as Unread</a>
+
+                                            @if($tab === "draft")
+                                            <a class="dropdown-item" href="#" id="mark-all-unread">Mark as Unread</a>
                                             <a class="dropdown-item" href="#" id="mark-as-important">Mark as Important</a>
-                                            <a class="dropdown-item" href="#">Add to Tasks</a>
-                                            <a class="dropdown-item" href="#">Trash</a>
+                                            @else
+                                            <a class="dropdown-item" href="#" id="mark-all-unread">Mark as Unread</a>
+                                            <a class="dropdown-item" href="#" id="mark-as-important">Mark as Important</a>
+                                            <a class="dropdown-item" href="#" id="mark-as-spam">Spam</a>
+                                            <a class="dropdown-item" href="#" id="mark-as-archive">Archive</a>
                                             <a class="dropdown-item" href="#">Mute</a>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -110,7 +117,6 @@
                                         </li>
                                     </ul>
                                 </div>
-
                             </div>
                             <div class="col-auto">
                                 <!-- <div class="text-muted mb-2">1-50 of 154</div> -->
@@ -121,9 +127,8 @@
                     @foreach ($emails as $email)
                     <ul class="message-list" id="social-mail-list">
                         <li class="{{ $email->is_read ? 'read-email' : 'unread-email' }}">
-
                             <div class="col-mail col-mail-1">
-                                <div class="form-check checkbox-wrapper-mail fs-14">                                
+                                <div class="form-check checkbox-wrapper-mail fs-14">
                                     <input class="form-check-input email-checkbox" type="checkbox"
                                         data-email-id="{{ $email->id }}">
                                     <label class="form-check-label" for="checkbox"></label>
@@ -137,13 +142,32 @@
                                 </button>
                                 @if ($tab === 'sent')
                                 <a class="title">To:
-                                    {{ $email->recipient_id == Auth::id() ? 'Me' : ucfirst($email->recipient_name) }}</a>
-                                @elseif($tab === 'draft')
-                                <a class="title"><span style="color: red;">Draft</span>
-                                    {{ $email->recipient_id == Auth::id() ? 'Me' : ucfirst($email->recipient_name) }}</a>
-                                @else
+                                    {{ $email->recipient_id == Auth::id() ? 'Me' : ucfirst($email->recipient_name) }}
+                                </a>
+                                @elseif($tab === 'inbox')
                                 <a class="title">
-                                    {{ $email->recipient_id == Auth::id() ? 'Me' : ucfirst($email->recipient_name) }}</a>
+                                    From:
+                                    {{ $email->recipient_id == Auth::id() ? 'Me' : ucfirst($email->recipient_name) }}
+                                </a>
+                                @elseif($tab === 'draft')
+                                <a class="title">
+                                    <span style="color: red;">Draft</span>
+                                    {{ $email->recipient_id == Auth::id() ? 'Me' : ucfirst($email->recipient_name) }}
+                                </a>
+                                @else
+                                @if($email->recipient_id == Auth::id())
+                                <a class="title">
+                                    {{ucfirst($email->recipient_name)}}
+                                </a>
+                                @elseif($email->is_draft)
+                                <a class="title">
+                                    <span style="color: red;">Draft</span>
+                                </a>
+                                @elseif($email->recipient_id != Auth::id())
+                                <a class="title">
+                                    {{ucfirst($email->sender_name)}}
+                                </a>
+                                @endif
                                 @endif
                             </div>
                             <div class="col-mail col-mail-2">
@@ -156,10 +180,10 @@
                                     data-email-body="{{ $email->mail_body }}"
                                     data-is-draft="{{ $tab === 'all' ? ($email->is_draft ? 'true' : 'false') : ($tab === 'draft' ? 'true' : 'false') }}">
                                     @if ($tab === 'inbox' && !$email->is_read)
-                                    <b>{{ ucfirst($email->mail_subject) }}</b> -
+                                    <b>{{ ucfirst($email->mail_subject) }}</b>
                                     {{ ucfirst($email->mail_body) }}
                                     @else
-                                    {{ ucfirst($email->mail_subject) }} - {{ ucfirst($email->mail_body) }}
+                                    {{ $email->mail_subject ? ucfirst($email->mail_subject) : '(no Subject)' }} - {{ ucfirst($email->mail_body) }}
                                     @endif
                                 </a>
                                 <div class="date">{{ $email->created_at->format('j M') }}</div>
@@ -168,9 +192,11 @@
                     </ul>
                     @endforeach
 
-                    <!-- Modals showing the draft mail and other mails  -->
+
+                    <!-- Modals showing the draft mail and other mails -->
                     <form method="POST" action="{{route('mail.store')}}">
                         @csrf
+                        <input type="hidden" id="email_id" name="email_id" value=""> 
                         <input type="hidden" id="user_id" name="user_id" value="{{auth()->id()}}">
                         <div class="modal fade" id="ShowDraftMails" tabindex="-1" role="dialog" aria-labelledby="composemodalTitle" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -258,108 +284,7 @@
                             </div>
                         </div>
                     </form>
-
-
                     <script>
-                        document.getElementById('trashButton').addEventListener('click', function(event) {
-                            event.preventDefault(); 
-                            document.getElementById('formMethod').value = 'POST';
-                            document.getElementById('ShowEmail').action = '/trash-email';
-                            document.getElementById('ShowEmail').submit();
-                        });
-                        document.getElementById('label-select').addEventListener('change', function(e) {
-                            // Get the selected label ID
-                            const labelId = this.value;
-
-                            if (!labelId) {
-                                alert('Please select a valid label.');
-                                return;
-                            }
-
-                            // Collect all checked email IDs
-                            const checkedEmails = Array.from(document.querySelectorAll('.email-checkbox:checked'))
-                                .map(checkbox => checkbox.dataset.emailId);
-
-                            if (checkedEmails.length === 0) {
-                                alert('Please select at least one email to label.');
-                                // Reset the dropdown
-                                this.selectedIndex = 0;
-                                return;
-                            }
-
-                            // Send the request to the server
-                            fetch('/emails/assign-label', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                    },
-                                    body: JSON.stringify({
-                                        mail_id: checkedEmails,
-                                        label_id: labelId,
-                                    }),
-                                })
-                                .then((response) => response.json())
-                                .then((data) => {
-                                    if (data.success) {
-                                        alert('Emails labeled successfully.');
-                                        // Optionally, refresh the page or update the UI
-                                    } else {
-                                        alert(data.message || 'Failed to label emails.');
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error('Error:', error);
-                                    alert('An error occurred while labeling emails.');
-                                })
-                                .finally(() => {
-                                    // Reset the dropdown after action
-                                    this.selectedIndex = 0;
-                                });
-                        });
-
-                        document.getElementById('mark-all-unread').addEventListener('click', function(e) {
-                            e.preventDefault();
-
-                            fetch('/emails/mark-all-unread', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                    },
-                                    body: JSON.stringify({
-                                        tab: 'inbox',
-                                    })
-                                })
-
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        alert('All emails marked as unread.');
-
-                                        const emailItems = document.querySelectorAll('.message-list li');
-                                        emailItems.forEach(item => {
-                                            item.classList.remove('read-email');
-                                            item.classList.add('unread-email');
-
-                                            const subject = item.querySelector('.subject');
-                                            if (subject && !subject.querySelector('b')) {
-                                                subject.innerHTML = `<b>${subject.textContent.trim()}</b>`;
-                                            }
-                                        });
-                                    } else {
-                                        alert('Failed to mark all emails as unread.');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    alert('An error occurred while marking emails as unread.');
-                                });
-                        });
-
-
-
-
                         document.addEventListener('DOMContentLoaded', function() {
                             const emailSubjects = document.querySelectorAll('.email-subject');
                             emailSubjects.forEach(subject => {
@@ -375,7 +300,6 @@
                                     if (isDraft) {
                                         // Populate the Draft Modal   
                                         document.getElementById('email_id').value = emailId;
-                                        document.querySelector('#ShowDraftMails input[name="email"]').value = recipientName;
                                         document.querySelector('#ShowDraftMails input[name="mail_subject"]').value = emailSubject;
                                         document.querySelector('#ShowDraftMails textarea[name="mail_body"]').value = emailBody;
 
@@ -383,10 +307,14 @@
                                         const draftModal = new bootstrap.Modal(document.getElementById('ShowDraftMails'));
                                         draftModal.show();
                                     } else {
-                                        // Populate the All Mails Modal
+                                        // Populate the All Mails Modal 
                                         document.querySelector('#AllMails .modal-body').innerHTML = `
                                         <p><strong>Subject:</strong> ${emailSubject}</p>
+                                        @if($tab === "sent")
+                                        <p><strong>To:</strong> ${recipientName}</p>
+                                        @else
                                         <p><strong>From:</strong> ${recipientName}</p>
+                                        @endif
                                         <p><strong>Body:</strong></p>
                                         <input type="hidden" name="email_id" id="email_id" value="${emailId}">
                                         <p>${emailBody}</p>
@@ -397,6 +325,7 @@
                                 });
                             });
                         });
+
                         document.addEventListener('DOMContentLoaded', function() {
                             let saveDraftTimer;
                             const inputs = document.querySelectorAll('#ShowDraftMails input[name="email"], #ShowDraftMails input[name="mail_subject"], #ShowDraftMails textarea[name="mail_body"]');
@@ -434,76 +363,10 @@
                                     })
                                     .catch(error => console.error('Error saving draft:', error));
                             }
-                        }); 
-
-
-                        document.querySelectorAll('.favourite-btn').forEach(button => {
-                            button.addEventListener('click', function() {
-                                const emailId = this.dataset.emailId;
-                                const isStarred = this.classList.contains('active') ? false : true;
-
-                                fetch(`/emails/${emailId}/toggle-star`, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                        },
-                                        body: JSON.stringify({
-                                            is_starred: isStarred
-                                        })
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            this.classList.toggle('active', isStarred);
-                                        } else {
-                                            alert('Failed to update star status');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        alert('An error occurred while updating star status');
-                                    });
-                            });
-                        });
-
-                        document.getElementById('mark-as-important').addEventListener('click', function(e) {
-                            e.preventDefault();
-
-                            // Collect all checked email IDs
-                            const checkedEmails = Array.from(document.querySelectorAll('.email-checkbox:checked'))
-                                .map(checkbox => checkbox.dataset.emailId);
-
-                            if (checkedEmails.length === 0) {
-                                alert('Please select at least one email.');
-                                return;
-                            }
-
-                            // Send the request to the server
-                            fetch('/emails/mark-important', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                    },
-                                    body: JSON.stringify({
-                                        mail_id: checkedEmails
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        alert('Emails marked as important successfully.');
-                                    } else {
-                                        alert('Failed to mark emails as important.');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    alert('An error occurred while marking emails as important.');
-                                });
                         });
                     </script>
+
+
 
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="pills-primary" role="tabpanel" aria-labelledby="pills-primary-tab">

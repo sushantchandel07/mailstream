@@ -5,19 +5,19 @@
                 <!-- Dark Logo-->
                 <a href="/" class="logo logo-dark">
                     <span class="logo-sm">
-                        <img src="/assets/images/logo-sm.png" alt="" height="22">
+                        <img src="" alt="" height="22">
                     </span>
                     <span class="logo-lg">
-                        <img src="/assets/images/logo-dark.png" alt="" height="17">
+                        <img src="" alt="" height="17">
                     </span>
                 </a>
                 <!-- Light Logo-->
                 <a href="/" class="logo logo-light">
                     <span class="logo-sm">
-                        <img src="/assets/images/logo-sm.png" alt="" height="22">
+                        <img src="" alt="" height="22">
                     </span>
                     <span class="logo-lg">
-                        <img src="/assets/images/logo-light.png" alt="" height="17">
+                        <img src="" alt="" height="17">
                     </span>
                 </a>
                 <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
@@ -37,105 +37,110 @@
                                     <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#composemodal"><i data-feather="plus-circle" class="icon-xs me-1 icon-dual-light"></i> Compose</button>
                                 </div>
 
-                                <div class="mx-n4 px-4 email-menu-sidebar-scroll" data-simplebar>
-                                    <div class="mail-list mt-3">
-                                        <a href="{{ route('mail.all') }}" class="{{ $tab === 'all' ? 'active' : '' }}">
-                                            <i class="ri-mail-fill me-3 align-middle fw-medium"></i>
-                                            <span class="mail-list-link">All</span>
-                                        </a>
+                                <div class="mail-list mt-3">
+                                    <a href="{{ route('mail.tab', ['tab' => 'all']) }}" class="{{ $tab === 'all' ? 'active' : '' }}">
+                                        <i class="ri-mail-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">All</span>
+                                    </a>
 
-                                        <a href="{{ route('mail.inbox') }}" class="{{ $tab === 'inbox' ? 'active' : '' }}">
-                                            <i class="ri-inbox-archive-fill me-3 align-middle fw-medium"></i>
-                                            <span class="mail-list-link">Inbox</span>
-                                        </a>
-                                        <a href="{{ route('mail.sent') }}" class="{{ $tab === 'sent' ? 'active' : '' }}">
-                                            <i class="ri-send-plane-2-fill me-3 align-middle fw-medium"></i>
-                                            <span class="mail-list-link">Sent</span>
-                                        </a>
-                                        <a href="{{ route('mail.drafts') }}" class="{{ $tab === 'draft' ? 'active' : '' }}">
-                                            <i class="ri-edit-2-fill me-3 align-middle fw-medium"></i>
-                                            <span class="mail-list-link">Draft</span>
-                                        </a>
-                                        <a href="{{ route('mail.starred') }}" class="{{ $tab === 'starred' ? 'active' : '' }}">
-                                            <i class="ri-star-fill me-3 align-middle fw-medium"></i>
-                                            <span class="mail-list-link">Starred</span>
-                                        </a>
-                                        <a href="{{ route('mail.important') }}" class="{{ $tab === 'important' ? 'active' : '' }}">
-                                            <i class="ri-star-fill me-3 align-middle fw-medium"></i>
-                                            <span class="mail-list-link">Important</span>
-                                        </a>
-                                        <a href="{{ route('mail.trash') }}" class="{{ $tab === 'trash' ? 'active' : '' }}">
-                                            <i class="ri-delete-bin-5-fill me-3 align-middle fw-medium"></i>
-                                            <span class="mail-list-link">Trash</span>
-                                        </a>
-                                        <!-- <a href="#"><i class="ri-delete-bin-5-fill me-3 align-middle fw-medium"></i><span class="mail-list-link">Trash</span></a> -->
-                                    </div>
+                                    <a href="{{ route('mail.tab', ['tab' => 'inbox']) }}" class="{{ $tab === 'inbox' ? 'active' : '' }}">
+                                        <i class="ri-inbox-archive-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">Inbox</span>
+                                    </a>
+                                    <a href="{{ route('mail.tab', ['tab' => 'sent']) }}" class="{{ $tab === 'sent' ? 'active' : '' }}">
+                                        <i class="ri-send-plane-2-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">Sent</span>
+                                    </a>
+                                    <a href="{{ route('mail.tab', ['tab' => 'draft']) }}" class="{{ $tab === 'draft' ? 'active' : '' }}">
+                                        <i class="ri-edit-2-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">Draft</span>
+                                    </a>
+                                    <a href="{{ route('mail.tab', ['tab' => 'starred']) }}" class="{{ $tab === 'starred' ? 'active' : '' }}">
+                                        <i class="ri-star-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">Starred</span>
+                                    </a>
+                                    <a href="{{ route('mail.tab', ['tab' => 'important']) }}" class="{{ $tab === 'important' ? 'active' : '' }}">
+                                        <i class="ri-star-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">Important</span>
+                                    </a>
+                                    <a href="{{ route('mail.tab', ['tab' => 'spam']) }}" class="{{ $tab === 'spam' ? 'active' : '' }}">
+                                        <i class="ri-spam-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">Spam</span>
+                                    </a>
+                                    <a href="{{ route('mail.tab', ['tab' => 'archive']) }}" class="{{ $tab === 'archive' ? 'active' : '' }}">
+                                        <i class="ri-archive-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">Archive</span>
+                                    </a>
+                                    <a href="{{ route('mail.tab', ['tab' => 'trash']) }}" class="{{ $tab === 'trash' ? 'active' : '' }}">
+                                        <i class="ri-delete-bin-5-fill me-3 align-middle fw-medium"></i>
+                                        <span class="mail-list-link">Trash</span>
+                                    </a>
+                                </div>
 
 
-
-                                    <div>
-                                        <div class="border-top border-top-dashed pt-3 mt-3">
-                                            <div class="mt-2 vstack email-chat-list mx-n4">
-                                            </div>
+                                <div>
+                                    <div class="border-top border-top-dashed pt-3 mt-3">
+                                        <div class="mt-2 vstack email-chat-list mx-n4">
                                         </div>
-                                        <h3 class="fs-12 text-uppercase text-muted mt-4 cursor-pointer" data-bs-toggle="modal" data-bs-target="#EmailLabel" onclick="openAddLabelForm()">
-                                            Create Labels
-                                        </h3>
-                                        <div class=" d-flex justify-around gap-sm-1 align-items-center flex-wrap">
-                                            <!-- <div class="pb-4 border-bottom border-bottom-dashed">
+                                    </div>
+                                    <h3 class="fs-12 text-uppercase text-muted mt-4 cursor-pointer" data-bs-toggle="modal" data-bs-target="#EmailLabel" onclick="openAddLabelForm()">
+                                        Create Labels
+                                    </h3>
+                                    <div class=" d-flex justify-around gap-sm-1 align-items-center flex-wrap">
+                                        <!-- <div class="pb-4 border-bottom border-bottom-dashed">
                                         <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#composemodal"><i data-feather="plus-circle" class="icon-xs me-1 icon-dual-light"></i> Compose</button>
                                             </div> -->
 
 
-                                            <h5 class="fs-12 text-uppercase text-muted mt-4 cursor-pointer">
-                                                Labels
-                                            </h5>
+                                        <h5 class="fs-12 text-uppercase text-muted mt-4 cursor-pointer">
+                                            Labels
+                                        </h5>
 
-                                        </div>
-
-                                        <div class="mail-list mt-1">
-                                            @foreach($labels as $label)
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <a href="{{ route('quickmail.labels.emails', $label->id) }}" class="d-flex align-items-center text-decoration-none">
-                                                    <span class="ri-checkbox-blank-circle-line me-2 text-info"></span>
-                                                    <span class="mail-list-link" data-type="label">{{ $label->name }}</span>
-                                                </a>
-
-                                                <div class="dropdown">
-                                                    <button class="btn btn-ghost-secondary btn-icon shadow-none btn-sm fs-16" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                        <i class="ri-more-2-fill align-bottom"></i>
-                                                    </button>
-                                                    <div class="dropdown-menu dropdown-menu-end">
-                                                        <a class="dropdown-item" href="#">Open</a>
-                                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#EmailLabel" onclick="openEditLabelForm('{{ $label->name }}', '{{ $label->id }}')">Edit</a>
-                                                        <!-- <a class="dropdown-item" href="#">Show If Unread </a> -->
-                                                        <form method="POST" action="{{ route('quickmail.labels.destroy', $label->id) }}" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to delete this label?')">Remove</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            @endforeach
-                                        </div>
                                     </div>
 
-                                </div>
+                                    <div class="mail-list mt-1">
+                                        @foreach($labels as $label)
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <a href="{{ route('quickmail.labels.emails', $label->id) }}" class="d-flex align-items-center text-decoration-none">
+                                                <span class="ri-checkbox-blank-circle-line me-2 text-info"></span>
+                                                <span class="mail-list-link" data-type="label">{{ $label->name }}</span>
+                                            </a>
 
+                                            <div class="dropdown">
+                                                <button class="btn btn-ghost-secondary btn-icon shadow-none btn-sm fs-16" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="ri-more-2-fill align-bottom"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item" href="#">Open</a>
+                                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#EmailLabel" onclick="openEditLabelForm('{{ $label->name }}', '{{ $label->id }}')">Edit</a>
+                                                    <!-- <a class="dropdown-item" href="#">Show If Unread </a> -->
+                                                    <form method="POST" action="{{ route('quickmail.labels.destroy', $label->id) }}" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to delete this label?')">Remove</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
 
                             </div>
 
-                        </ul>
+
                     </div>
 
-                    <!-- Sidebar -->
-                </div>
-
             </ul>
+        </div>
+
+        <!-- Sidebar -->
+        </div>
+
+        </ul>
 
 
-            <div class="sidebar-background"></div>
+        <div class="sidebar-background"></div>
         </div>
         <!-- Left Sidebar End -->
         <!-- Vertical Overlay-->
@@ -159,12 +164,13 @@
                     <div class="modal-content">
                         <div class="modal-header p-3 bg-light">
                             <h5 class="modal-title" id="composemodalTitle">New Message</h5>
+
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div>
                                 <div class="mb-3 position-relative">
-                                    <input type="text" class="form-control email-compose-input" data-choices data-choices-limit="15" name="email" data-choices-removeItem placeholder="To">
+                                    <input type="text" class="form-control email-compose-input" data-choices data-choices-limit="15" name="email" data-choices-removeItem placeholder="To" required>
                                     <div class="position-absolute top-0 end-0">
                                         <div class="d-flex">
                                             <button class="btn btn-link text-reset fw-semibold px-2" type="button" name="cc[]" data-bs-toggle="collapse" data-bs-target="#CcRecipientsCollapse" aria-expanded="false" aria-controls="CcRecipientsCollapse">
@@ -190,16 +196,13 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <input type="text" class="form-control" placeholder="Subject" name="mail_subject">
+                                    <input type="text" class="form-control" placeholder="Subject" name="mail_subject" required>
                                 </div>
                                 <div class="ck-editor-reverse">
                                     <textarea type="text" placeholder="Body" class="form-control py-2" name="mail_body"></textarea>
                                     <!-- <textarea  id="editor" placeholder="Body" class="form-control py-2"  name="mail_body"></textarea> -->
                                     <div id="email-editor"></div>
                                 </div>
-
-
-
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -242,8 +245,6 @@
                     formData.append('email_id', draftId);
                 }
 
-
-
                 fetch("{{ route('mail.draft') }}", {
                         method: 'POST',
                         body: formData,
@@ -264,7 +265,6 @@
 
         <form method="POST" id="labelForm">
             @csrf
-            @method('DELETE')
             <input type="hidden" name="_method" id="formMethod" value="POST">
             <div class="modal fade" id="EmailLabel" tabindex="-1" role="dialog" aria-labelledby="composemodalTitle" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -275,7 +275,7 @@
                         </div>
                         <div class="modal-body">
                             <div class="mb-3 position-relative">
-                                <input type="text" class="form-control email-compose-input" data-choices data-choices-limit="15" name="label" data-choices-removeItem placeholder="Add Here" id="labelInput">
+                                <input type="text" class="form-control email-compose-input" data-choices data-choices-limit="15" name="label" data-choices-removeItem placeholder="Add Here" id="labelInput" required>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -325,10 +325,10 @@
                             <button type="button" class="btn w-sm btn-danger " id="delete-record">Yes, Delete It!</button>
                         </div>
                     </div>
-
                 </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+
 
 
         <!--start back-to-top-->

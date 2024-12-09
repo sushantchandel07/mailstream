@@ -13,6 +13,7 @@ class EmailRecipient extends Model{
         'sender_id',
         'is_read',
         'is_starred',
+        'is_spam',
         'is_trashed',
         'is_archived',
         'is_important',

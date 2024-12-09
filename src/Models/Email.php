@@ -13,7 +13,8 @@ class Email extends Model
         'is_sent',
         'is_draft',
         'user_id',
-        'draft_is_starred'
+        'draft_is_starred',
+        'draft_is_important'
     ];
     protected $casts = [
         'is_sent' => 'boolean',

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedMediumInteger('recipients_id');
             $table->unsignedMediumInteger('mail_id');
             $table->unsignedMediumInteger('sender_id');
-
+            $table->boolean('is_spam')->default(false);
             $table->boolean('is_read')->default(false);
             $table->boolean('is_starred')->default(false);
             $table->boolean('is_trashed')->default(false);

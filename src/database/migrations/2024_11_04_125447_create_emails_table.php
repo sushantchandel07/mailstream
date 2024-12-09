@@ -18,6 +18,7 @@ return new class extends Migration
             $table->boolean('is_sent')->default(false);
             $table->boolean('is_draft')->default(true);
             $table->boolean('draft_is_starred')->default(false);
+            $table->boolean('draft_is_important')->default(false);
             $table->unsignedMediumInteger('user_id')->nullable();
             $table->timestamp('sent_at')->nullable();
 

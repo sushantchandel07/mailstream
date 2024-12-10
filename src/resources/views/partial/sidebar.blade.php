@@ -170,7 +170,10 @@
                         <div class="modal-body">
                             <div>
                                 <div class="mb-3 position-relative">
-                                    <input type="text" class="form-control email-compose-input" data-choices data-choices-limit="15" name="email" data-choices-removeItem placeholder="To" required>
+                                    <input type="text" class="form-control email-compose-input @error('email') is-invalid @enderror" data-choices data-choices-limit="15" name="email" data-choices-removeItem placeholder="To" required>
+                                    @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                     <div class="position-absolute top-0 end-0">
                                         <div class="d-flex">
                                             <button class="btn btn-link text-reset fw-semibold px-2" type="button" name="cc[]" data-bs-toggle="collapse" data-bs-target="#CcRecipientsCollapse" aria-expanded="false" aria-controls="CcRecipientsCollapse">

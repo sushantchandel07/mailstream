@@ -12,7 +12,7 @@ class EmailRequest extends FormRequest{
     public function rules() :array
     {
         return[
-         'email' => 'required|email', 
+         'email' => 'required|email|exists:users,email', 
          'mail_subject' => 'required|string',
          'mail_body'=>'string',
         ];

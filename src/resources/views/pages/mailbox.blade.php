@@ -196,7 +196,7 @@
                     <!-- Modals showing the draft mail and other mails -->
                     <form method="POST" action="{{route('mail.store')}}">
                         @csrf
-                        <input type="hidden" id="email_id" name="email_id" value=""> 
+                        <input type="hidden" id="email_id" name="email_id" value="">
                         <input type="hidden" id="user_id" name="user_id" value="{{auth()->id()}}">
                         <div class="modal fade" id="ShowDraftMails" tabindex="-1" role="dialog" aria-labelledby="composemodalTitle" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -208,7 +208,10 @@
                                     <div class="modal-body">
                                         <div>
                                             <div class="mb-3 position-relative">
-                                                <input type="text" class="form-control email-compose-input" data-choices data-choices-limit="15" name="email" data-choices-removeItem placeholder="To">
+                                                <input type="text" class="form-control email-compose-input  @error('email') is-invalid @enderror" data-choices data-choices-limit="15" name="email" data-choices-removeItem placeholder="To">
+                                                @error('email')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                                 <div class="position-absolute top-0 end-0">
                                                     <div class="d-flex">
                                                         <button class="btn btn-link text-reset fw-semibold px-2" type="button" name="cc[]" data-bs-toggle="collapse" data-bs-target="#CcRecipientsCollapse" aria-expanded="false" aria-controls="CcRecipientsCollapse">

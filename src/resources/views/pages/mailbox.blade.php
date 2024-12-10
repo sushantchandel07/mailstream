@@ -173,6 +173,7 @@
                             <div class="col-mail col-mail-2">
                                 <a href="#" class="subject email-subject"
                                     data-email-id="{{ $email->id }}"
+                                    data-is-draft="{{ $email->is_draft ? 'true' : 'false' }}"
                                     data-email-recipient-id="{{ $email->recipient_id }}"
                                     data-email-recipient-name="{{ $email->recipient_name }}"
                                     data-recipient-email="{{ $email->recipient_name }}"
